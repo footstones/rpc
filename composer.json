@@ -1,0 +1,24 @@
+{
+    "name": "footstones/rpc",
+    "type": "library",
+    "description": "A PHP RPC Framework.",
+    "keywords": ["rpc"],
+    "homepage": "https://github.com/footstones/rpc",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": { 
+            "Footstones\\RPC\\": "src/",
+            "Footstones\\RPC\\Tests\\": "tests/",
+            "Footstones\\RPC\\Example\\": "example/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Wellming Li",
+            "email": "wellming.li@howzhi.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.0"
+    }
+}
