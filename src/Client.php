@@ -19,15 +19,20 @@ class Client
         $data =  Packager::pack(['m' => $method, 'p' => $parameters]);
         $response = $this->_request($this->_uri, $data['data']);
 
-        // var_dump($response);exit();
-
         switch ($response['body']['s']) {
             case Consts::ERR_OKEY:
                 return $response['body']['r'];
+            case Consts::ERR_PACKAGER:
+                throw new ClientPackagerException($response['body']['e']);
+            case Consts::ERR_PROTOCOL:
+                throw new ClientPackagerException($response['body']['e']);
+            case Consts::ERR_TRANSPORT:
+                throw new ClientTransportException($response['body']['e']);
+            case Consts::ERR_REQUEST:
             case Consts::ERR_EXCEPTION:
                 throw new ServerException($response['body']['e']);
             default:
-                # code...
+                throw new ClientException($response['body']['e']);
                 break;
         }
 

@@ -3,7 +3,6 @@
 namespace Footstones\RPC;
 
 use Footstones\RPC\Packager;
-
 use Footstones\RPC\Consts;
 
 class Server
@@ -17,12 +16,28 @@ class Server
 
     public function handle($data)
     {
-        $unpacked = Packager::unpack($data);
+        $response = [];
+
+        try {
+            $unpacked = Packager::unpack($data);
+        } catch(\Exception $e) {
+            $response['s'] = Consts::ERR_PACKAGER;
+            $response['e'] = [
+                'message' => $e->getMessage(),
+            ];
+            goto end;
+        }
 
         $method = $unpacked['body']['m'];
         $parameters = $unpacked['body']['p'];
 
-        $response = [];
+        if (!is_callable([$this->service, $method])) {
+            $response['s'] = Consts::ERR_REQUEST;
+            $response['e'] = [
+                'message' => sprintf("call to undefined api %s::%s", get_class($this->service), $method),
+            ];
+            goto end;
+        }
 
         try {
             $response['r'] = call_user_func_array([$this->service, $method], $parameters);
@@ -38,6 +53,7 @@ class Server
             ];
         }
 
+        end:
         return Packager::pack($response);
     }
 }

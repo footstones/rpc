@@ -2,6 +2,8 @@
 
 namespace Footstones\RPC;
 
+use Footstones\RPC\UnpackException;
+
 class Packager
 {
 
@@ -33,9 +35,18 @@ class Packager
 
     public static function unpack($data)
     {
-        $header = static::_unpackHeader(substr($data, 0, 82));
-        $protocol = trim(substr($data, 82, 8));
-        $body = unserialize(substr($data, 90, hexdec($header['bodyLength'])));
+        $header = static::_unpackHeader($data);
+        $body = substr($data, 82);
+        $protocol = trim(substr($body, 0, 8));
+
+        if (strlen($body) != hexdec($header['bodyLength'])) {
+            throw new UnpackException('body length error.');
+        }
+
+        $body = unserialize(substr($body, 8));
+        if (empty($body)) {
+            throw new UnpackException('unpack body error.');
+        }
 
         return [
             'header' => $header,
@@ -44,10 +55,13 @@ class Packager
         ];
     }
 
-    private static function _unpackHeader($header)
+    private static function _unpackHeader($data)
     {
+        $header = substr($data, 0, 82);
+        $len = strlen($header);
+
         $raw = '';
-        for($i=0; $i < strlen($header); $i++) {
+        for($i=0; $i < $len; $i++) {
             $hex= dechex(ord($header[$i]));
             if (strlen($hex) == 1) {
                 $hex = '0' . $hex;
@@ -55,7 +69,7 @@ class Packager
             $raw .= $hex;
         }
 
-        return [
+        $header = [
             'transactionId' => substr($raw, 0, 8),
             'protoclVersion' => substr($raw, 8, 4),
             'magicNum' => substr($raw, 12, 8),
@@ -64,5 +78,11 @@ class Packager
             'token' => substr($raw, 92, 64),
             'bodyLength' => substr($raw, 156, 8),
         ];
+
+        if (strtoupper($header['magicNum']) != '80DFEC60') {
+            throw new UnpackException('malformed response header: ' . substr($data, 0, 200));
+        }
+
+        return $header;
     }
 }

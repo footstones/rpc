@@ -31,7 +31,12 @@ class ServerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(Consts::ERR_EXCEPTION, $response['body']['s']);
         $this->assertEquals('Footstones\RPC\Tests\TestServiceException', $response['body']['e']['_type']);
+    }
 
+    public function testCallUndefinedMethod()
+    {
+        $response = $this->callRPC('undefinedMethod');
+        $this->assertEquals(Consts::ERR_REQUEST, $response['body']['s']);
     }
 
 
