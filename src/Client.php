@@ -90,7 +90,11 @@ class Client
             throw new ClientTransportException("erver responsed non-200 code {$curlinfo['http_code']}");
         }
 
-        return Packager::unpack($body);
+        try {
+            return Packager::unpack($body);
+        } catch (\Exception $e) {
+            throw new ClientTransportException($e->getMessage());
+        }
 
     }
 
