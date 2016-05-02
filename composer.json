@@ -8,8 +8,7 @@
     "autoload": {
         "psr-4": { 
             "Footstones\\RPC\\": "src/",
-            "Footstones\\RPC\\Tests\\": "tests/",
-            "Footstones\\RPC\\Example\\": "example/"
+            "Footstones\\RPC\\Tests\\": "tests/"
         }
     },
     "authors": [

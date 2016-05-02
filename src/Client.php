@@ -14,10 +14,14 @@ class Client
         $this->_uri = $uri;
     }
 
-    public function call($method, $parameters = [])
+    public function __call($method, $parameters = [])
     {
         $data =  Packager::pack(['m' => $method, 'p' => $parameters]);
         $response = $this->_request($this->_uri, $data['data']);
+
+        if (isset($response['body']['o'])) {
+            echo $response['body']['o'];
+        }
 
         switch ($response['body']['s']) {
             case Consts::ERR_OKEY:
@@ -35,8 +39,6 @@ class Client
                 throw new ClientException($response['body']['e']);
                 break;
         }
-
-
     }
 
     protected function _request($uri, $data)
@@ -73,22 +75,19 @@ class Client
         );
 
         if (empty($curlinfo['namelookup_time'])) {
-            $this->logger && $this->logger->error("[{$requestId}] NAME_LOOK_UP_TIMEOUT", $context);
+            throw new ClientTransportException("server address look up timeout.");
         }
 
         if (empty($curlinfo['connect_time'])) {
-            $this->logger && $this->logger->error("[{$requestId}] API_CONNECT_TIMEOUT", $context);
-            throw new CloudAPIIOException("Connect api server timeout (url: {$url}).");
+            throw new ClientTransportException("server connect timeout.");
         }
 
         if (empty($curlinfo['starttransfer_time'])) {
-            $this->logger && $this->logger->error("[{$requestId}] API_TIMEOUT", $context);
-            throw new CloudAPIIOException("Request api server timeout (url:{$url}).");
+            throw new ClientTransportException("server request timeout.");
         }
 
-        if ($curlinfo['http_code'] >= 500) {
-            $this->logger && $this->logger->error("[{$requestId}] API_RESOPNSE_ERROR", $context);
-            throw new CloudAPIIOException("Api server internal error (url:{$url}).");
+        if ($curlinfo['http_code'] != 200) {
+            throw new ClientTransportException("erver responsed non-200 code {$curlinfo['http_code']}");
         }
 
         return Packager::unpack($body);

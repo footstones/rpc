@@ -6,10 +6,10 @@ use Footstones\RPC\Server;
 
 class TestService
 {
-    public function test()
+    public function test1()
     {
-        throw new \RuntimeException('this is exception', 567);
-        return ['hello' => 'world'];
+        echo 'this is output';
+        return ['result' => 'this is test1 result.'];
     }
 }
 

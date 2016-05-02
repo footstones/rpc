@@ -40,8 +40,18 @@ class Server
         }
 
         try {
+            ob_start();
+            
             $response['r'] = call_user_func_array([$this->service, $method], $parameters);
             $response['s'] = Consts::ERR_OKEY;
+
+            $output = ob_get_contents();
+            ob_end_clean();
+
+            if (strlen($output) > 0) {
+                $response['o'] = $output;
+            }
+            
         } catch(\Exception $e) {
             $response['s'] = Consts::ERR_EXCEPTION;
             $response['e'] = [

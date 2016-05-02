@@ -6,6 +6,12 @@ use Footstones\RPC\Client;
 
 $client = new Client('http://localhost/footstones/rpc/example/server.php');
 
-$result = $client->call('test');
+print_result('result1', $client->test1());
 
-var_dump($result);
+function print_result($label, $result)
+{
+    echo "<p>{$label}:</p>";
+    echo "<pre>";
+    var_dump($result);
+    echo "</pre>";
+}
