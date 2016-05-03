@@ -18,7 +18,6 @@ class TestService
 {
     public function test1()
     {
-        echo 'this is output';
         return ['result' => 'this is test1 result.'];
     }
 }
