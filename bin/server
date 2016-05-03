@@ -1,0 +1,26 @@
+#!/usr/bin/env php
+<?php
+
+$autoloader = require __DIR__.'/../src/composer_autoload.php';
+
+if (!$autoloader()) {
+    die('class autoloader not found.');
+}
+
+if (count($argv) != 3 || !in_array($argv[1], array('start', 'stop', 'restart', 'status'))) {
+    echo "Please input: bin/server start|stop|restart|status config_file_path\n";
+    exit();
+}
+
+$config = include $argv[2];
+
+
+if (!empty($config['bootstrap'])) {
+    include $config['bootstrap'];
+}
+
+use Footstones\RPC\ServerDaemon;
+
+$daemon = new ServerDaemon($config);
+
+$daemon->main($argv[1]);

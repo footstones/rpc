@@ -8,7 +8,8 @@
     "autoload": {
         "psr-4": { 
             "Footstones\\RPC\\": "src/",
-            "Footstones\\RPC\\Tests\\": "tests/"
+            "Footstones\\RPC\\Tests\\": "tests/",
+            "Footstones\\RPC\\Examples\\": "Examples/"
         }
     },
     "authors": [
@@ -19,5 +20,7 @@
     ],
     "require": {
         "php": ">=5.5.0"
-    }
+    },
+
+    "bin": ["bin/server"]
 }
