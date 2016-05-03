@@ -12,7 +12,14 @@ if (count($argv) != 3 || !in_array($argv[1], array('start', 'stop', 'restart', '
     exit();
 }
 
+$configFile = realpath($argv[2]);
+
+if (!file_exists($configFile)) {
+    echo "confie file {$argv[2]} is not exist.\n";
+    exit();
+}
 $config = include $argv[2];
+$config['config_file'] = $configFile;
 
 
 if (!empty($config['bootstrap'])) {
