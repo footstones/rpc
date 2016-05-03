@@ -76,11 +76,16 @@ class ServerDaemon
     private function createHttpServer()
     {
         $server = new swoole_http_server($this->config['host'], $this->config['port'], SWOOLE_BASE);
-        $server->set([
-            'http_parse_post' => false,
-            'daemonize' => empty($this->config['daemonize']) ? 0 : 1,
-            'worker_num' => empty($this->config['worker_num']) ? 4 : $this->config['worker_num'],
-        ]);
+
+        $cfg = [];
+        $cfg['http_parse_post'] = false;
+        $cfg['daemonize'] =  empty($this->config['daemonize']) ? 0 : 1;
+        $cfg['worker_num'] = empty($this->config['worker_num']) ? 4 : $this->config['worker_num'];
+        if ($this->config['error_log']) {
+            $cfg['log_file'] = $this->config['error_log'];
+        }
+
+        $server->set($cfg);
 
         $class = $this->config['handler'];
 
