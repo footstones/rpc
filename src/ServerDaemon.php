@@ -6,7 +6,9 @@ use \swoole_http_server;
 
 class ServerDaemon
 {
-    private $server;
+    protected $config;
+
+    protected $server;
 
     public function __construct($config)
     {
@@ -47,6 +49,12 @@ class ServerDaemon
         }
 
         $this->server = $this->createHttpServer();
+
+        foreach ($this->config['processes'] as $process) {
+            $process = new $process($this->server);
+            $this->server->addProcess($process->getProcess());
+        }
+
         $this->server->start();
     }
 

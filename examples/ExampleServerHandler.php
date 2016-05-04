@@ -2,9 +2,10 @@
 
 namespace Footstones\RPC\Examples;
 
+use Footstones\RPC\ServerHandler;
 use Footstones\RPC\Server;
 
-class ExampleServerHandler
+class ExampleServerHandler implements ServerHandler
 {
     public function onRequest($request, $response)
     {
