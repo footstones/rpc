@@ -13,7 +13,8 @@ class TestService
     }
 }
 
-$server = new Server(new TestService());
+$server = new Server();
+$server->setService(new TestService());
 
 $response = $server->handle(file_get_contents('php://input'));
 

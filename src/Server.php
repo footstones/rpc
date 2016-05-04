@@ -9,7 +9,14 @@ class Server
 {
     protected $service;
 
-    public function __construct($service)
+    public function __construct($service = null)
+    {
+        if ($service) {
+            $this->service = $service;
+        }
+    }
+
+    public function setService($service)
     {
         $this->service = $service;
     }
