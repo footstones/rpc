@@ -15,7 +15,6 @@ class Test1Process extends AbstractServerProcess
 
     public function timerLoop()
     {
-        echo "test1 process loop.\n";
         swoole_timer_after(1000, [$this, 'timerLoop']);
     }
 }

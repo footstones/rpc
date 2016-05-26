@@ -9,25 +9,29 @@ class Server
 {
     protected $service;
 
-    public function __construct()
+    public function __construct($logger)
     {
-
+        $this->logger = $logger;
     }
 
-    public function handle($service, $data)
+    public function handle($service, $data, $request)
     {
+        $this->logger->debug('request: '. $data, $request);
         $response = [];
 
         try {
             $unpacked = Packager::unpack($data);
+            $this->logger->debug('unpacked request', $unpacked);
         } catch(\Exception $e) {
             $response['s'] = Consts::ERR_PACKAGER;
             $response['e'] = [
                 'message' => $e->getMessage(),
             ];
+            $this->logger->error('unpack error', $response);
             goto end;
         }
 
+        $transaction = $unpacked['header']['transactionId'];
         $method = $unpacked['body']['m'];
         $parameters = $unpacked['body']['p'];
 
@@ -36,6 +40,8 @@ class Server
             $response['e'] = [
                 'message' => sprintf("call to undefined api %s::%s", get_class($service), $method),
             ];
+
+            $this->logger->warning('api undefined', $response);
             goto end;
         }
 
@@ -45,11 +51,14 @@ class Server
             $response['r'] = call_user_func_array([$service, $method], $parameters);
             $response['s'] = Consts::ERR_OKEY;
 
+            $this->logger->debug('api call result', $response['r']);
+
             $output = ob_get_contents();
             ob_end_clean();
 
             if (strlen($output) > 0) {
                 $response['o'] = $output;
+                $this->logger->debug('api call output: ', $output);
             }
             
         } catch(\Exception $e) {
@@ -61,10 +70,15 @@ class Server
                 'line' => $e->getLine(),
                 '_type' => get_class($e),
             ];
+            $this->logger->warning('api call exception', $response);
         }
 
         end:
-        return Packager::pack($response);
+        $this->logger->debug('response', $response);
+        $response = Packager::pack($response, $transaction);
+
+        return $response;
+
     }
 }
 

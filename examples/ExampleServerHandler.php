@@ -9,16 +9,28 @@ class ExampleServerHandler implements ServerHandler
 {
     public function onRequest($request, $response)
     {
-        $server = new Server(new TestService());
-        $handled = $server->handle($request->rawContent());
+        $server = new Server($this->getLogger('ServerHandler'));
+        $handled = $server->handle(new TestService(), $request->rawContent(), $request->server);
         $response->end($handled['data']);
     }
+
+    public function setServer($server)
+    {
+        $this->server = $server;
+    }
+
+    protected function getLogger($channel = null)
+    {
+        return $this->server->getLogger($channel);
+    }
+
+
 }
 
 class TestService
 {
-    public function test1()
+    public function echoName($name)
     {
-        return ['result' => 'this is test1 result.'];
+        return ['result' => "Your name: {$name}."];
     }
 }

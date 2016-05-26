@@ -7,11 +7,13 @@ use Footstones\RPC\UnpackException;
 class Packager
 {
 
-    public static function pack($struct)
+    public static function pack($struct, $transaction = null)
     {
         $body = str_pad('PHP', 8, chr(0)) . serialize($struct);
 
-        $transaction = sprintf('%08x', mt_rand());
+        if (!$transaction) {
+            $transaction = sprintf('%08x', mt_rand());
+        }
 
         $header = '';
         $header = $transaction;                     //transaction id

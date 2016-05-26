@@ -2,6 +2,8 @@
 
 namespace Footstones\RPC;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use \swoole_http_server;
 
 class ServerDaemon
@@ -9,6 +11,8 @@ class ServerDaemon
     protected $config;
 
     protected $server;
+
+    protected $loggers = [];
 
     public function __construct($config)
     {
@@ -51,7 +55,7 @@ class ServerDaemon
         $this->server = $this->createHttpServer();
 
         foreach ($this->config['processes'] as $name => $process) {
-            $process = new $process($this->server, $this->getServerName(), $name);
+            $process = new $process($this, $name);
             $this->server->addProcess($process->getProcess());
         }
 
@@ -99,6 +103,7 @@ class ServerDaemon
         $class = $this->config['handler'];
 
         $handler = new $class();
+        $handler->setServer($this);
 
         $server->on('Start', array($this, 'onMasterStart'));
         $server->on('Shutdown', array($this, 'onMasterStop'));
@@ -131,9 +136,28 @@ class ServerDaemon
         swoole_set_process_name(sprintf('%s: worker [> #%s]', $this->getServerName(), $server->master_pid));
     }
 
-    protected function getServerName()
+    public function getServerName()
     {
         return !empty($this->config['server_name']) ? $this->config['server_name'] : 'footstone server';
+    }
+
+    public function getServerPid()
+    {
+        return $this->server->master_pid;
+    }
+
+    public function getLogger($channel = 'default')
+    {
+        if (isset($this->loggers[$channel])) {
+            return $this->loggers[$channel];
+        }
+
+        $logger = new Logger($channel);
+        $logger->pushHandler(new StreamHandler($this->config['run_log'] , Logger::DEBUG));
+
+        $this->loggers[$channel] = $logger;
+
+        return $logger;
     }
 
 }

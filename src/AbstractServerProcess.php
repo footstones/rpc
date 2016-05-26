@@ -8,21 +8,20 @@ abstract class AbstractServerProcess
 {
     protected $process;
 
-    protected $serverName;
+    protected $name;
 
-    protected $processName;
+    protected $server;
 
-    public function __construct($server, $serverName, $processName)
+    public function __construct($server, $name)
     {
         $this->server = $server;
-        $this->serverName = $serverName;
-        $this->processName = $processName;
+        $this->name = $name;
         $this->process = new swoole_process([$this, 'main']);
     }
 
     public function main($process)
     {
-        swoole_set_process_name(sprintf('%s: %s process [> #%s]', $this->serverName, $this->processName, $this->server->master_pid));
+        swoole_set_process_name(sprintf('%s: %s process [> #%s]', $this->server->getServerName(), $this->name, $this->server->getServerPid()));
         $this->loop($process);
     }
 

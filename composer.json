@@ -19,7 +19,8 @@
         }
     ],
     "require": {
-        "php": ">=5.5.0"
+        "php": ">=5.5.0",
+        "monolog/monolog": "^1.19"
     },
 
     "bin": ["bin/server"]
