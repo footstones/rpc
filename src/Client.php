@@ -27,16 +27,16 @@ class Client
             case Consts::ERR_OKEY:
                 return $response['body']['r'];
             case Consts::ERR_PACKAGER:
-                throw new ClientPackagerException($response['body']['e']);
+                throw new ClientPackagerException($response['body']['e']['message']);
             case Consts::ERR_PROTOCOL:
-                throw new ClientPackagerException($response['body']['e']);
+                throw new ClientPackagerException($response['body']['e']['message']);
             case Consts::ERR_TRANSPORT:
-                throw new ClientTransportException($response['body']['e']);
+                throw new ClientTransportException($response['body']['e']['message']);
             case Consts::ERR_REQUEST:
             case Consts::ERR_EXCEPTION:
-                throw new ServerException($response['body']['e']);
+                throw new ServerException($response['body']['e']['message']);
             default:
-                throw new ClientException($response['body']['e']);
+                throw new ClientException($response['body']['e']['message']);
                 break;
         }
     }

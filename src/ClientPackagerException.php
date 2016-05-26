@@ -2,7 +2,7 @@
 
 namespace Footstones\RPC;
 
-class ClientException extends ClientException
+class ClientPackagerException extends ClientException
 {
 
 

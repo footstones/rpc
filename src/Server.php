@@ -9,19 +9,12 @@ class Server
 {
     protected $service;
 
-    public function __construct($service = null)
+    public function __construct()
     {
-        if ($service) {
-            $this->service = $service;
-        }
+
     }
 
-    public function setService($service)
-    {
-        $this->service = $service;
-    }
-
-    public function handle($data)
+    public function handle($service, $data)
     {
         $response = [];
 
@@ -38,10 +31,10 @@ class Server
         $method = $unpacked['body']['m'];
         $parameters = $unpacked['body']['p'];
 
-        if (!is_callable([$this->service, $method])) {
+        if (!is_callable([$service, $method])) {
             $response['s'] = Consts::ERR_REQUEST;
             $response['e'] = [
-                'message' => sprintf("call to undefined api %s::%s", get_class($this->service), $method),
+                'message' => sprintf("call to undefined api %s::%s", get_class($service), $method),
             ];
             goto end;
         }
@@ -49,7 +42,7 @@ class Server
         try {
             ob_start();
             
-            $response['r'] = call_user_func_array([$this->service, $method], $parameters);
+            $response['r'] = call_user_func_array([$service, $method], $parameters);
             $response['s'] = Consts::ERR_OKEY;
 
             $output = ob_get_contents();
