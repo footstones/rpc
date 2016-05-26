@@ -50,8 +50,8 @@ class ServerDaemon
 
         $this->server = $this->createHttpServer();
 
-        foreach ($this->config['processes'] as $process) {
-            $process = new $process($this->server);
+        foreach ($this->config['processes'] as $name => $process) {
+            $process = new $process($this->server, $this->getServerName(), $name);
             $this->server->addProcess($process->getProcess());
         }
 
@@ -83,12 +83,13 @@ class ServerDaemon
 
     private function createHttpServer()
     {
-        $server = new swoole_http_server($this->config['host'], $this->config['port'], SWOOLE_BASE);
+        $server = new swoole_http_server($this->config['host'], $this->config['port']);
 
         $cfg = [];
         $cfg['http_parse_post'] = false;
         $cfg['daemonize'] =  empty($this->config['daemonize']) ? 0 : 1;
         $cfg['worker_num'] = empty($this->config['worker_num']) ? 4 : $this->config['worker_num'];
+        $cfg['dispatch_mode'] = 3;
         if ($this->config['error_log']) {
             $cfg['log_file'] = $this->config['error_log'];
         }
@@ -122,12 +123,12 @@ class ServerDaemon
 
     public function onManagerStart($server)
     {
-        swoole_set_process_name(sprintf('%s: manager', $this->getServerName()));
+        swoole_set_process_name(sprintf('%s: manager [> #%s]', $this->getServerName(), $server->master_pid));
     }
 
     public function onWorkerStart($server)
     {
-        swoole_set_process_name(sprintf('%s: worker (under master #%s)', $this->getServerName(), $server->master_pid));
+        swoole_set_process_name(sprintf('%s: worker [> #%s]', $this->getServerName(), $server->master_pid));
     }
 
     protected function getServerName()

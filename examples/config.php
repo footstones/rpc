@@ -3,7 +3,7 @@
 return [
     'host' => '0.0.0.0',
     'port' => 10000,
-    'daemonize' => 0,
+    'daemonize' => 1,
     'worker_num' => 4,
     'server_name' => 'example server',
     'pid_file' => '/tmp/example_server.pid',
@@ -12,7 +12,7 @@ return [
     'bootstrap' => __DIR__ . '/bootstrap.php',
     'handler' => 'Footstones\\RPC\\Examples\\ExampleServerHandler',
     'processes' => [
-        'Footstones\\RPC\\Examples\\Test1Process',
-        'Footstones\\RPC\\Examples\\Test2Process',
+        'test1' => 'Footstones\\RPC\\Examples\\Test1Process',
+        'test2' => 'Footstones\\RPC\\Examples\\Test2Process',
     ]
 ];
