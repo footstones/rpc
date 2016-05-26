@@ -27,13 +27,15 @@ class Server
             $response['e'] = [
                 'message' => $e->getMessage(),
             ];
-            $this->logger->error('unpack error', $response);
+            $this->logger->error("unpack error: {$response['e']}", $request);
             goto end;
         }
 
         $transaction = $unpacked['header']['transactionId'];
         $method = $unpacked['body']['m'];
         $parameters = $unpacked['body']['p'];
+
+        $this->logger->info("{$request['remote_addr']} {$request['request_method']} {$request['request_uri']} {$method}", $parameters);
 
         if (!is_callable([$service, $method])) {
             $response['s'] = Consts::ERR_REQUEST;
@@ -75,7 +77,7 @@ class Server
 
         end:
         $this->logger->debug('response', $response);
-        $response = Packager::pack($response, $transaction);
+        $response = Packager::pack($response, isset($transaction) ? $transaction : null);
 
         return $response;
 
