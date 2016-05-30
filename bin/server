@@ -7,8 +7,8 @@ if (!$autoloader()) {
     die('class autoloader not found.');
 }
 
-if (count($argv) != 3 || !in_array($argv[1], array('start', 'stop', 'restart', 'status'))) {
-    echo "Please input: bin/server start|stop|restart|status config_file_path\n";
+if (count($argv) != 3 || !in_array($argv[1], array('start', 'stop', 'restart', 'reload'))) {
+    echo "Please input: bin/server start|stop|restart|reload config_file_path\n";
     exit();
 }
 

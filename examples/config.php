@@ -3,7 +3,7 @@
 return [
     'host' => '0.0.0.0',
     'port' => 10000,
-    'daemonize' => 0,
+    'daemonize' => 1,
     'worker_num' => 4,
     'server_name' => 'example server',
     'pid_file' => '/tmp/example_server.pid',

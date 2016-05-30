@@ -34,9 +34,6 @@ class ServerDaemon
             case 'reload':
                 $this->reloadServer();
                 break;
-            case 'status':
-                $this->statusServer();
-                break;
             default:
                 break;
         }
@@ -44,13 +41,12 @@ class ServerDaemon
 
     protected function startServer()
     {
-        if (file_exists($this->config['pid_file'])) {
-            $pid = file_get_contents($this->config['pid_file']);
-
-            if (posix_kill($pid, 0)) {
-                exit("Server is already running.\n");
-            }
+        $pid = $this->getPidFromFile();
+        if ($pid && posix_kill($pid, 0)) {
+            exit("Server is already running.\n");
         }
+
+        print("start server.\n");
 
         $this->server = $this->createHttpServer();
 
@@ -62,27 +58,58 @@ class ServerDaemon
         $this->server->start();
     }
 
+    protected function getPidFromFile()
+    {
+        if (file_exists($this->config['pid_file'])) {
+            $pid = (int) file_get_contents($this->config['pid_file']);
+        } else {
+            $pid = 0;
+        }
+
+        return $pid;
+    }
+
     protected function stopServer()
     {
-        $pid = file_get_contents($this->config['pid_file']);
+        $pid = $this->getPidFromFile();
+        if (empty($pid)) {
+            exit('server is not running.');
+        }
+
+        print("stop server.\n");
+
         posix_kill($pid, SIGTERM);
     }
 
     protected function restartServer()
     {
         $this->stopServer();
+
+        $i = 0;
+        while ($i < 5) {
+            $pid = $this->getPidFromFile();
+            if (empty($pid)) {
+                break;
+            }
+            sleep(1);
+            $i++;
+        }
+
         $this->startServer();
     }
 
     protected function reloadServer()
     {
-        $pid = file_get_contents($this->config['pid_file']);
+        $pid = $this->getPidFromFile();
+        if (empty($pid)) {
+            exit('server is not running.');
+        }
+
+        print("reload server.\n");
+
         posix_kill($pid, SIGUSR1);
-    }
 
-    protected function statusServer()
-    {
-
+        $this->getLogger()->notice("reload server, pid #{$pid}.");
     }
 
     private function createHttpServer()
@@ -119,11 +146,17 @@ class ServerDaemon
     {
         swoole_set_process_name(sprintf('%s: master (%s:%s,%s)', $this->getServerName(), $this->config['host'], $this->config['port'], $this->config['config_file']));
         file_put_contents($this->config['pid_file'], $server->master_pid);
+
+        $this->getLogger()->notice("server started, pid #{$server->master_pid}.");
     }
 
-    public function onMasterStop($serv)
+    public function onMasterStop($server)
     {
-        unlink($this->config['pid_file']);
+        if (file_exists($this->config['pid_file'])) {
+            unlink($this->config['pid_file']);
+        }
+
+        $this->getLogger()->notice("server stoped, pid #{$server->master_pid}.");
     }
 
     public function onManagerStart($server)
