@@ -53,7 +53,7 @@ class Server
             $response['r'] = call_user_func_array([$service, $method], $parameters);
             $response['s'] = Consts::ERR_OKEY;
 
-            $this->logger->debug('api call result', $response['r']);
+            $this->logger->debug('api call result', $response);
 
             $output = ob_get_contents();
             ob_end_clean();
